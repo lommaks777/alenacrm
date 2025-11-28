@@ -1,0 +1,28 @@
+# Telegram Bot Framework
+aiogram==3.13.1
+
+# Google Sheets Integration
+gspread==6.0.2
+gspread-asyncio==2.0.0
+google-auth==2.35.0
+
+# OpenAI API
+openai==1.57.0
+
+# Task Scheduling
+apscheduler==3.10.4
+
+# Environment Management
+python-dotenv==1.0.1
+
+# Data Validation
+pydantic==2.9.2
+
+# Async HTTP Client
+aiohttp==3.10.10
+
+# Timezone Support
+pytz==2024.2
+
+# Audio Processing (if needed for format conversion)
+pydub==0.25.1
