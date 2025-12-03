@@ -566,8 +566,10 @@ async def handle_query(message: Message, processing_msg: Message, transcription:
         for record in records:
             name = record.get('Name', '')
             size = record.get('Size', '')
-            qty = int(record.get('Qty', 0))
-            price = float(record.get('Price', 0))
+            qty = int(record.get('Qty', 0) or 0)
+            # Handle empty string for Price
+            price_value = record.get('Price', 0)
+            price = float(price_value) if price_value and str(price_value).strip() else 0.0
             
             if name:
                 if name not in products:
