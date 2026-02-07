@@ -257,9 +257,14 @@ class SheetsService:
                             sku = f"{name}_{size}"
                             new_qty = qty_change
                             
-                            await inventory_ws.append_row([
+                            # Find next available row by counting existing data
+                            all_values = await inventory_ws.get_all_values()
+                            next_row = len(all_values) + 1
+                            
+                            # Use update() instead of append_row() to avoid issues with empty rows
+                            await inventory_ws.update(f'A{next_row}:G{next_row}', [[
                                 sku, name, size, new_qty, price, purchase_price, timestamp
-                            ])
+                            ]])
                             
                             updated_items.append({
                                 'name': name,
@@ -272,9 +277,14 @@ class SheetsService:
                     client_name = item.get('client_name', '')
                     total_amount = price * qty_change
                     
-                    await transactions_ws.append_row([
+                    # Find next available row in Transactions
+                    trans_values = await transactions_ws.get_all_values()
+                    next_trans_row = len(trans_values) + 1
+                    
+                    # Use update() instead of append_row()
+                    await transactions_ws.update(f'A{next_trans_row}:H{next_trans_row}', [[
                         timestamp, transaction_type, client_name, name, size, price, qty_change, total_amount
-                    ])
+                    ]])
                 
                 logger.info(f"Updated inventory with {len(updated_items)} items ({transaction_type})")
                 return updated_items
@@ -424,10 +434,12 @@ class SheetsService:
                     ]])
                     logger.info(f"Updated existing client: {name}")
                 else:
-                    # Add new client
-                    await worksheet.append_row([
+                    # Add new client - use update() instead of append_row()
+                    # Find next available row
+                    next_row = len(all_values) + 1
+                    await worksheet.update(f'A{next_row}:G{next_row}', [[
                         name, instagram, telegram, description, transaction, reminder_date, reminder_text
-                    ])
+                    ]])
                     logger.info(f"Added new client: {name}")
                 
             except Exception as e:
@@ -784,8 +796,13 @@ class SheetsService:
                     ]
                     rows_to_add.append(row)
                 
-                # Append all rows
-                await preorders_ws.append_rows(rows_to_add)
+                # Find next available row
+                all_values = await preorders_ws.get_all_values()
+                next_row = len(all_values) + 1
+                
+                # Use update() for each row instead of append_rows()
+                for idx, row in enumerate(rows_to_add):
+                    await preorders_ws.update(f'A{next_row + idx}:G{next_row + idx}', [row])
                 
                 logger.info(f"Added preorder for {client_name}: {len(items)} items")
                 return True
