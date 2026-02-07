@@ -197,10 +197,17 @@ PRODUCT MATCHING RULES:
 - You MUST NOT ignore: special features like "высокая талия", "низкая талия", "бразилиана", "стринги", "слип", etc.
 - If special feature is mentioned but not in existing products, create NEW product name with that feature
 - ONLY include items with quantity GREATER THAN 0. Skip items with 0 quantity.
-- Extract SALE price ("продажа по", "цена продажи") if mentioned. If not mentioned, use 0.
+- Extract SALE price ("продажа по", "цена продажи", "цена") if mentioned. If not mentioned, use 0.
 - Extract PURCHASE price ("закупка по", "закупочная цена", "купили по", "стоимость закупки") if mentioned. If not mentioned, use 0.
 
+CRITICAL RULE - DO NOT HALLUCINATE:
+- NEVER add information that is NOT in the user's input
+- NEVER invent patterns, colors, or features ("в полоску", "в горошек", etc.) if they are NOT mentioned
+- ONLY use exact characteristics from the input text
+- When matching, preserve EXACT wording from input unless normalizing grammar
+
 EXAMPLES:
+
 Input: "добавь бежевый топ сеткой M 5 штук, продажа по 25 долларов, закупка по 15 долларов" (inventory has "Бежевые Топ Сетка")
 Output: {{items: [{{name: "Бежевые Топ Сетка", size: "M", quantity: 5, price: 25, purchase_price: 15}}]}}
 (Match found - same color, type, material, both prices extracted)
@@ -216,6 +223,10 @@ Output: {{items: [{{name: "Черные Трусы Сетка Высокая Т�
 Input: "добавь черные трусы бразилиана M 3 штуки по цене 28 долларов" (inventory has "Черные Трусы Сетка")
 Output: {{items: [{{name: "Черные Трусы Бразилиана", size: "M", quantity: 3, price: 28, purchase_price: 0}}]}}
 (NO match - "бразилиана" is different style, create NEW product with sale price)
+
+Input: "Лифт треугольниками, шоколадная сетка, стринги 75А, две штуки, цена 65 долларов"
+Output: {{items: [{{name: "Лифт Треугольниками Шоколадная Сетка Стринги 75А", size: "75А", quantity: 2, price: 65, purchase_price: 0}}]}}
+(NEW product - use EXACT description from input, do NOT add "в полоску" or other invented details)
 
 Extract all items being restocked with their names, sizes, quantities, and prices.
 Return data in the specified JSON format."""
