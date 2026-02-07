@@ -126,18 +126,25 @@ class AIService:
                     {
                         "role": "system",
                         "content": """You are a warehouse assistant. Determine if the user's message is about:
-- SUPPLY: Restocking inventory, receiving new products, incoming stock, adding items
+- SUPPLY: Restocking inventory, receiving new products, incoming stock, adding items to warehouse
 - SALE: Customer purchase, selling products, client transaction (includes mentions of price, buying, purchasing)
 - PREORDER: Customer wants to order items for future delivery, "предзаказ", "заказать", "хочет заказать"
 - CLIENT_EDIT: ONLY adding personal notes/characteristics about client WITHOUT any sale/purchase information
 - QUERY: Questions about inventory, stock levels, asking "how many", "what's in stock", "show me"
 
 Key indicators:
-- SALE: mentions price, buying, purchasing, "купила", "купил", "за X долларов", PAST TENSE purchases
+- SALE: **HIGHEST PRIORITY** - mentions CLIENT NAME ("Клиент [Имя]", "Покупатель [Имя]"), mentions price with client, buying, purchasing, "купила", "купил", "за X долларов", PAST TENSE purchases
 - PREORDER: "предзаказ", "заказать", "хочет заказать", FUTURE orders without immediate payment
 - CLIENT_EDIT: ONLY preferences, interests, characteristics WITHOUT purchase details
-- SUPPLY: adding to stock, "добавь", "поставка", receiving products, "пришло"
+- SUPPLY: adding to stock WITHOUT client name, "добавь", "поставка", "завези", receiving products, "пришло"
 - QUERY: questions about stock, "сколько", "что на складе", "покажи", "есть ли"
+
+CRITICAL RULE: If message mentions BOTH client name AND product with price → ALWAYS classify as "sale", NOT "supply"
+
+Examples:
+- "Клиент Елена купила боди за 80 долларов" → sale
+- "Добавь на склад боди 5 штук" → supply
+- "Клиент Анна, боди черная, цена 80 долларов" → sale (client name + product + price)
 
 Respond with only one word: "supply", "sale", "preorder", "client_edit", or "query"."""
                     },
