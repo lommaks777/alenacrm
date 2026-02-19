@@ -132,18 +132,33 @@ class AIService:
 - CLIENT_EDIT: ONLY adding personal notes/characteristics about client WITHOUT any sale/purchase information
 - QUERY: Questions about inventory, stock levels, asking "how many", "what's in stock", "show me"
 
-Key indicators:
-- SALE: **HIGHEST PRIORITY** - mentions CLIENT NAME ("Клиент [Имя]", "Покупатель [Имя]"), mentions price with client, buying, purchasing, "купила", "купил", "за X долларов", PAST TENSE purchases
-- PREORDER: "предзаказ", "заказать", "хочет заказать", FUTURE orders without immediate payment
-- CLIENT_EDIT: ONLY preferences, interests, characteristics WITHOUT purchase details
-- SUPPLY: adding to stock WITHOUT client name, "добавь", "поставка", "завези", receiving products, "пришло"
-- QUERY: questions about stock, "сколько", "что на складе", "покажи", "есть ли"
+CLASSIFICATION PRIORITY (check in this order):
 
-CRITICAL RULE: If message mentions BOTH client name AND product with price → ALWAYS classify as "sale", NOT "supply"
+1. SUPPLY indicators (HIGHEST PRIORITY):
+   - Explicit phrases: "на склад", "поставка", "добавь", "внеси", "завези", "пришло", "новый товар"
+   - If ANY of these phrases present → ALWAYS classify as "supply", even if price mentioned
+   - NO client name mentioned
+
+2. SALE indicators:
+   - Client name present: "Клиент [Имя]", "Покупатель [Имя]"
+   - Past tense purchase: "купила", "купил", "приобрела"
+   - Price WITH client name (not warehouse context)
+
+3. PREORDER: "предзаказ", "заказать", "хочет заказать"
+
+4. QUERY: questions about stock, "сколько", "что на складе", "покажи"
+
+CRITICAL RULES:
+- If "на склад" or "поставка" or "добавь" or "внеси" is mentioned → ALWAYS "supply"
+- Only classify as "sale" if client name is explicitly mentioned
+- Price alone does NOT mean sale - could be supply price
 
 Examples:
-- "Клиент Елена купила боди за 80 долларов" → sale
-- "Добавь на склад боди 5 штук" → supply
+- "Внеси новый товар на склад. Купальник Дива, цена 250 долларов" → supply ("на склад" = supply)
+- "Добавь новый товар на склад. Купальник, цена 250 долларов" → supply ("добавь на склад" = supply)
+- "новая поставка на склад купальник дива цена 250 долларов" → supply ("поставка на склад" = supply)
+- "Клиент Елена купила боди за 80 долларов" → sale (client name present)
+- "Добавь на склад боди 5 штук" → supply ("добавь на склад" = supply)
 - "Клиент Анна, боди черная, цена 80 долларов" → sale (client name + product + price)
 
 Respond with only one word: "supply", "sale", "preorder", "client_edit", or "query"."""
